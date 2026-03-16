@@ -386,14 +386,14 @@ export default function HomePage() {
           <GrowLine className="h-1 bg-gold rounded mb-12" />
 
           <FadeUp>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-8 text-center">
               Operación nacional
             </h2>
           </FadeUp>
 
           <div className="flex flex-col items-center text-center">
             <ScaleUp delay={0.2}>
-              <div className="w-full max-w-4xl mx-auto rounded-xl overflow-hidden border border-white/10 mb-6">
+              <div className="w-[80vw] max-w-7xl mx-auto rounded-xl overflow-hidden border border-white/10 mb-6">
                 <iframe
                   src="https://maps.google.com/maps?q=Carrera+101+%2317-53,+Cali,+Colombia&t=&z=16&ie=UTF8&iwloc=&output=embed"
                   width="100%"
