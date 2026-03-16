@@ -5,14 +5,19 @@ let _client: SanityClient | null = null;
 export function getSanityClient(): SanityClient {
   if (!_client) {
     const projectId = process.env.SANITY_PROJECT_ID;
-    if (!projectId) {
-      throw new Error('SANITY_PROJECT_ID no está configurado');
+    const token = process.env.SANITY_API_TOKEN;
+
+    if (!projectId || !token) {
+      throw new Error(
+        'Sanity no está configurado. Asegúrese de configurar SANITY_PROJECT_ID y SANITY_API_TOKEN en las variables de entorno.'
+      );
     }
+
     _client = createClient({
       projectId,
       dataset: process.env.SANITY_DATASET || 'production',
       apiVersion: '2024-01-01',
-      token: process.env.SANITY_API_TOKEN,
+      token,
       useCdn: false,
     });
   }
