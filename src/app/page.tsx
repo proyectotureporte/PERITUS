@@ -31,10 +31,10 @@ import {
 
 const peritosEspecializados = [
   { nombre: 'Medicina', icon: HeartPulse },
-  { nombre: 'Legal', icon: Scale },
+  { nombre: 'Ingenieria', icon: Scale },
   { nombre: 'Finanzas', icon: TrendingUp },
   { nombre: 'Informática', icon: Monitor },
-  { nombre: 'Vivienda', icon: Home },
+  { nombre: 'Grafología', icon: Home },
   { nombre: 'Industria', icon: Factory },
 ];
 
@@ -43,7 +43,7 @@ const beneficios = [
   'Dictámenes con estándares técnicos y validez legal en cualquier jurisdicción.',
   'Equipo multidisciplinario que cubre todas las áreas periciales.',
   'Tiempos de respuesta optimizados para cumplir con plazos procesales.',
-  'Asesoría personalizada durante todo el proceso judicial.',
+  'Acompañamiento durante todo el proceso judicial',
   'Confidencialidad y manejo seguro de la información de cada caso.',
 ];
 
@@ -56,7 +56,7 @@ const valores = [
   },
   {
     icon: Clock,
-    titulo: 'Oportunidad',
+    titulo: 'Confianza',
     texto:
       'Tiempos de respuesta eficientes que se ajustan a los plazos procesales de cada caso.',
   },
@@ -203,19 +203,17 @@ export default function HomePage() {
 
             <FadeRight>
               <div className="flex flex-col items-center">
-                <div className="w-64 h-72 bg-gray-200 rounded-xl flex items-center justify-center overflow-hidden">
-                  <div className="text-center text-gray-400">
-                    <svg
-                      className="w-24 h-24 mx-auto mb-2"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                    </svg>
-                  </div>
+                <div className="w-64 h-72 rounded-xl overflow-hidden">
+                  <Image
+                    src="/perfil linkedin.jpg"
+                    alt="Magister Freddy Oliveros"
+                    width={256}
+                    height={288}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <h3 className="mt-4 text-lg font-bold text-navy-dark">
-                  Mg. Freddy Oliveros
+                  Magister. Freddy Oliveros
                 </h3>
                 <p className="text-gray-500">Director general</p>
               </div>
@@ -395,14 +393,14 @@ export default function HomePage() {
             <ScaleUp delay={0.2}>
               <div className="w-[80vw] max-w-7xl mx-auto rounded-xl overflow-hidden border border-white/10 mb-6">
                 <iframe
-                  src="https://maps.google.com/maps?q=Carrera+101+%2317-53,+Cali,+Colombia&t=&z=16&ie=UTF8&iwloc=&output=embed"
+                  src="https://maps.google.com/maps?q=Carrera+101+%2317-36,+Cali,+Colombia&t=&z=16&ie=UTF8&iwloc=&output=embed"
                   width="100%"
                   height="400"
                   style={{ border: 0 }}
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  title="Ubicación Peritus - Carrera 101 #17-53, Cali"
+                  title="Ubicación Peritus - Carrera 101 #17-36, Cali"
                 />
               </div>
             </ScaleUp>
