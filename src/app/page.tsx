@@ -97,7 +97,7 @@ export default function HomePage() {
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: `url('/fondo.webp')`,
+            backgroundImage: `url('/fondo.png')`,
             backgroundSize: 'auto 100%',
             backgroundPosition: 'right center',
             backgroundRepeat: 'no-repeat',
@@ -182,15 +182,8 @@ export default function HomePage() {
                 <h2 className="text-2xl sm:text-3xl font-bold text-navy-dark mb-6">
                   ¿Quiénes somos?
                 </h2>
-                <p className="text-gray-700 leading-relaxed mb-8">
-                  CNP es una entidad de carácter privado con más de 10 años de
-                  experiencia en la elaboración de dictámenes, así como en la
-                  asesoría técnica a abogados, jueces, magistrados y empresas del
-                  sector real en temas probatorios de carácter contable, tributario
-                  y económico. Contamos con un equipo altamente calificado en
-                  auditoría, análisis financiero y valoración de pruebas, que apoya
-                  la toma de decisiones en controversias judiciales con sustento
-                  técnico y precisión profesional.
+                <p className="text-gray-700 leading-relaxed mb-8 text-justify">
+                  <strong>Peritus</strong> es una plataforma que conecta profesionales del derecho y clientes con peritos especializados en diversas áreas técnicas y científicas, facilitando el acceso a dictámenes periciales claros, rigurosos y con plena validez legal, y brindando soporte técnico que fortalece los procesos judiciales a través de una red de expertos que aporta análisis confiables y contribuye a la solidez de cada caso.
                 </p>
                 <a
                   href="#equipo"
