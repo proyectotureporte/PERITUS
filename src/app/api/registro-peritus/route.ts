@@ -124,9 +124,8 @@ export async function POST(request: NextRequest) {
 
     // ============================================================
     // STEP 3: Create registroPeritus document (extra fields)
+    // contrasenaHash reuses the portalPassword hash so login matches the emailed credentials
     // ============================================================
-    const contrasenaHash = await bcrypt.hash(contrasena, 10)
-
     await client.create({
       _type: 'registroPeritus',
       peritusId,
@@ -143,7 +142,7 @@ export async function POST(request: NextRequest) {
       fechaRegistro: new Date().toISOString(),
       estadoDocumentacion: 'pendiente',
       activo: true,
-      contrasenaHash,
+      contrasenaHash: passwordHash,
       clientRef: { _type: 'reference', _ref: newCrmClient._id },
       ...(hojaDeVidaAsset && { hojaDeVida: hojaDeVidaAsset }),
     })

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { client } from '@/lib/sanity/client';
+import { writeClient } from '@/lib/sanity/client';
 import { comparePassword } from '@/lib/auth/passwords';
 import { signToken } from '@/lib/auth/jwt';
 
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
       const correo = email.trim().toLowerCase();
 
-      const perito = await client.fetch<RegistroPeritus | null>(
+      const perito = await writeClient.fetch<RegistroPeritus | null>(
         `*[_type == "registroPeritus" && correo == $correo && activo == true][0]{
           _id, nombreApellido, correo, contrasenaHash, activo,
           "clientRefId": clientRef._ref
