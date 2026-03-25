@@ -61,19 +61,19 @@ export default function PortalCasesPage() {
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 hover:bg-white/15 transition-colors cursor-pointer px-4 py-4 flex items-center justify-between">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs text-white/50">{c.caseCode}</span>
+                      <span className="font-mono text-xs text-white">{c.caseCode}</span>
                       <Badge className={`${sc?.bg} ${sc?.text} border-0 text-xs`}>
                         <span className={`mr-1 inline-block h-1.5 w-1.5 rounded-full ${sc?.dot}`} />
                         {CASE_STATUS_LABELS[c.status as CaseStatus]}
                       </Badge>
                     </div>
                     <p className="font-medium text-white">{c.title}</p>
-                    <p className="text-xs text-white/50">
+                    <p className="text-xs text-white">
                       {DISCIPLINE_LABELS[c.discipline as CaseDiscipline]} |{' '}
                       {new Date(c._createdAt).toLocaleDateString('es-CO')}
                     </p>
                   </div>
-                  <ChevronRight className="h-5 w-5 text-white/40" />
+                  <ChevronRight className="h-5 w-5 text-white" />
                 </div>
               </Link>
             );
