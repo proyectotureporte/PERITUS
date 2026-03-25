@@ -1,25 +1,20 @@
-import { createClient, type SanityClient } from '@sanity/client';
+import { createClient as createSanityClient, type SanityClient } from '@sanity/client';
 
-let _client: SanityClient | null = null;
+const config = {
+  projectId: process.env.SANITY_PROJECT_ID || process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
+  dataset: process.env.SANITY_DATASET || process.env.NEXT_PUBLIC_SANITY_DATASET!,
+  apiVersion: '2024-01-01',
+  useCdn: false,
+};
 
+export const client = createSanityClient(config);
+
+export const writeClient = createSanityClient({
+  ...config,
+  token: process.env.SANITY_API_TOKEN!,
+});
+
+// Legacy compat
 export function getSanityClient(): SanityClient {
-  if (!_client) {
-    const projectId = process.env.SANITY_PROJECT_ID;
-    const token = process.env.SANITY_API_TOKEN;
-
-    if (!projectId || !token) {
-      throw new Error(
-        'Sanity no está configurado. Asegúrese de configurar SANITY_PROJECT_ID y SANITY_API_TOKEN en las variables de entorno.'
-      );
-    }
-
-    _client = createClient({
-      projectId,
-      dataset: process.env.SANITY_DATASET || 'production',
-      apiVersion: '2024-01-01',
-      token,
-      useCdn: false,
-    });
-  }
-  return _client;
+  return writeClient;
 }
