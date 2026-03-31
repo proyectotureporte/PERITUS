@@ -14,9 +14,9 @@ import {
 } from '@/components/landing/Animations';
 
 const faqs = [
-  { label: '¿Qué es un dictamen pericial?', video: '/1.mp4' },
-  { label: 'REQUISITOS',                    video: '/2.mp4' },
-  { label: 'MODELO DE NEGOCIO',             video: '/3.mp4' },
+  { label: '¿Qué es un dictamen pericial?', video: 'https://cdn.sanity.io/files/fbva5pcb/production/e7342ee7ef7ac823253ad2d13bf7a5f213f83d33.mp4' },
+  { label: 'REQUISITOS',                    video: 'https://cdn.sanity.io/files/fbva5pcb/production/3da31933959afd5395d1b44f623a170b00e3b529.mp4' },
+  { label: 'MODELO DE NEGOCIO',             video: 'https://cdn.sanity.io/files/fbva5pcb/production/86b1688b7d242b5d7b25e3bd585f624fe4aa47c3.mp4' },
 ];
 
 export default function PeritoPage() {
