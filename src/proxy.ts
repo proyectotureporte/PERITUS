@@ -9,8 +9,10 @@ export async function proxy(request: NextRequest) {
   if (
     pathname === '/portal/login' ||
     pathname === '/portal/change-password' ||
+    pathname === '/portal/cotizaciones' ||
     pathname.startsWith('/api/auth/') ||
     pathname.startsWith('/api/cotizacion') ||
+    pathname.startsWith('/api/portal/cotizaciones/') ||
     pathname.startsWith('/api/registro-peritus') ||
     pathname === '/registro'
   ) {

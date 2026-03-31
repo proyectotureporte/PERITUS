@@ -5,7 +5,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 
-const navLinks = [
+interface NavLink { href: string; label: string; }
+
+const defaultNavLinks: NavLink[] = [
   { href: '#inicio', label: 'Inicio' },
   { href: '#servicios', label: 'Servicios' },
   { href: '#equipo', label: 'Nuestro equipo' },
@@ -13,7 +15,8 @@ const navLinks = [
   { href: '#contacto', label: 'Contacto' },
 ];
 
-export default function Header() {
+export default function Header({ navLinks: customLinks }: { navLinks?: NavLink[] } = {}) {
+  const navLinks = customLinks ?? defaultNavLinks;
   const [menuOpen, setMenuOpen] = useState(false);
 
   const scrollToSection = useCallback((e: React.MouseEvent<HTMLAnchorElement>, href: string) => {

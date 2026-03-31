@@ -10,13 +10,11 @@ import {
   Target,
   Clock,
   SearchCheck,
-  Play,
   Phone,
   Mail,
   MapPinned,
 } from 'lucide-react';
 import Header from '@/components/landing/Header';
-import CotizacionForm from '@/components/landing/CotizacionForm';
 import {
   FadeUp,
   FadeLeft,
@@ -68,10 +66,27 @@ const valores = [
   },
 ];
 
-const faqs = [
-  '¿Qué es un dictamen pericial?',
-  'REQUISITOS',
-  'MODELO DE NEGOCIO',
+const audienceCards = [
+  {
+    label: 'Soy perito',
+    image: '/dictamen-pericial.jpg',
+    href: '/perito',
+  },
+  {
+    label: 'Soy abogado',
+    image: '/lawyers-office.jpg',
+    href: '/abogado',
+  },
+  {
+    label: 'Soy juez',
+    image: '/gavel.jpg',
+    href: '/juez',
+  },
+  {
+    label: 'Soy empresa',
+    image: '/office-meeting.jpg',
+    href: '/empresa',
+  },
 ];
 
 const clientes = [
@@ -79,7 +94,11 @@ const clientes = [
   { nombre: 'RUTA N MEDELLÍN', logo: '/RUTANMEDELLIN.png' },
   { nombre: 'BANCOLOMBIA', logo: '/bancolombia.png' },
   { nombre: 'METROVIA', logo: '/METROVIA.png' },
-  { nombre: 'DAVIVIENDA', logo: '/davivienda.png' },
+  { nombre: 'DAVIVIENDA', logo: '/davivienda.png', w: 288, h: 160 },
+  { nombre: 'LOGON', logo: '/LOGON.png' },
+  { nombre: 'LOGON1', logo: '/LOGON1.png' },
+  { nombre: 'LOGON2', logo: '/LOGON2.png', w: 288, h: 160 },
+  { nombre: 'LOGON3', logo: '/LOGON3.png', w: 288, h: 160 },
 ];
 
 export default function HomePage() {
@@ -128,7 +147,7 @@ export default function HomePage() {
             <HeroFadeUp delay={0.8}>
               <div className="mt-8">
                 <a
-                  href="#contacto"
+                  href="#audiencia"
                   className="inline-block px-8 py-3 bg-white text-navy-dark font-bold rounded-lg hover:bg-white/90 transition-colors text-sm sm:text-base"
                 >
                   Asesor especialista
@@ -140,7 +159,102 @@ export default function HomePage() {
       </section>
 
       {/* ============================================ */}
-      {/* SECTION 2 — PERITOS ESPECIALIZADOS          */}
+      {/* SECTION 2 — ¿QUIÉN ERES? (AUDIENCE CARDS)  */}
+      {/* ============================================ */}
+      <section id="audiencia" style={{ backgroundColor: '#07152e', padding: '80px 0' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <FadeUp>
+            <h2
+              className="text-center mb-12"
+              style={{ fontSize: 'clamp(28px, 4vw, 38px)', fontWeight: 800, color: '#ffffff' }}
+            >
+              ¿Quién eres?
+            </h2>
+          </FadeUp>
+          <StaggerGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {audienceCards.map((card) => (
+              <StaggerItem key={card.label}>
+                <div
+                  style={{
+                    borderRadius: '14px',
+                    overflow: 'hidden',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
+                  {/* Image area */}
+                  <a href={card.href} className="audience-img-wrap" style={{ position: 'relative', flex: '0 0 auto', display: 'block' }}>
+                    <div style={{ paddingTop: '120%' }} />
+                    <Image
+                      src={card.image}
+                      alt={card.label}
+                      fill
+                      style={{ objectFit: 'cover', objectPosition: 'center' }}
+                    />
+                    <div className="audience-overlay">
+                      <span
+                        style={{
+                          fontSize: '13px',
+                          color: 'rgba(255,255,255,0.85)',
+                          textAlign: 'center',
+                          letterSpacing: '0.5px',
+                        }}
+                      >
+                        Haga clic en Ver más para conocer nuestros servicios
+                      </span>
+                    </div>
+                  </a>
+
+                  {/* Label + button */}
+                  <div
+                    style={{
+                      backgroundColor: '#0f3b85',
+                      padding: '22px 20px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '14px',
+                    }}
+                  >
+                    <h3
+                      style={{
+                        fontSize: '18px',
+                        fontWeight: 800,
+                        color: '#ffffff',
+                        textAlign: 'center',
+                        letterSpacing: '0.3px',
+                      }}
+                    >
+                      {card.label}
+                    </h3>
+                    <a
+                      href={card.href}
+                      style={{
+                        display: 'inline-block',
+                        fontSize: '13px',
+                        fontWeight: 800,
+                        backgroundColor: '#d4a843',
+                        color: '#0a2a6e',
+                        borderRadius: '8px',
+                        padding: '10px 28px',
+                        textDecoration: 'none',
+                        letterSpacing: '0.8px',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      Ver m&aacute;s
+                    </a>
+                  </div>
+                </div>
+              </StaggerItem>
+            ))}
+          </StaggerGrid>
+        </div>
+      </section>
+
+      {/* ============================================ */}
+      {/* SECTION 3 — PERITOS ESPECIALIZADOS          */}
       {/* ============================================ */}
       <section id="servicios" className="bg-blue-mid py-20 sm:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -172,7 +286,7 @@ export default function HomePage() {
       </section>
 
       {/* ============================================ */}
-      {/* SECTION 3 — QUIÉNES SOMOS                   */}
+      {/* SECTION 4 — QUIÉNES SOMOS                   */}
       {/* ============================================ */}
       <section id="equipo" className="bg-gray-50 py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -185,30 +299,20 @@ export default function HomePage() {
                 <p className="text-gray-700 leading-relaxed mb-8 text-justify">
                   <strong>Peritus</strong> es una plataforma que conecta profesionales del derecho y clientes con peritos especializados en diversas áreas técnicas y científicas, facilitando el acceso a dictámenes periciales claros, rigurosos y con plena validez legal, y brindando soporte técnico que fortalece los procesos judiciales a través de una red de expertos que aporta análisis confiables y contribuye a la solidez de cada caso.
                 </p>
-                <a
-                  href="#equipo"
-                  className="inline-block px-6 py-3 border-2 border-navy-dark text-navy-dark font-bold rounded-lg hover:bg-navy-dark hover:text-white transition-colors"
-                >
-                  Conozca el equipo
-                </a>
               </div>
             </FadeLeft>
 
             <FadeRight>
               <div className="flex flex-col items-center">
-                <div className="w-64 h-72 rounded-xl overflow-hidden">
+                <div className="w-full max-w-md rounded-xl overflow-hidden shadow-lg">
                   <Image
-                    src="/perfil linkedin.jpg"
-                    alt="Magister Freddy Oliveros"
-                    width={256}
-                    height={288}
-                    className="w-full h-full object-cover"
+                    src="/fondo.png"
+                    alt="Equipo Peritus"
+                    width={500}
+                    height={400}
+                    className="w-full h-auto object-cover"
                   />
                 </div>
-                <h3 className="mt-4 text-lg font-bold text-navy-dark">
-                  Magister. Freddy Oliveros
-                </h3>
-                <p className="text-gray-500">Director general</p>
               </div>
             </FadeRight>
           </div>
@@ -216,7 +320,7 @@ export default function HomePage() {
       </section>
 
       {/* ============================================ */}
-      {/* SECTION 4 — BENEFICIOS                      */}
+      {/* SECTION 5 — BENEFICIOS                      */}
       {/* ============================================ */}
       <section id="trayectoria" className="bg-navy py-20 sm:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -246,93 +350,94 @@ export default function HomePage() {
       </section>
 
       {/* ============================================ */}
-      {/* SECTION 5 — NUESTROS VALORES                */}
+      {/* SECTION 6 — NUESTROS VALORES (FLIP CARDS)   */}
       {/* ============================================ */}
-      <section className="bg-navy-dark py-20 sm:py-28">
+      <section style={{ backgroundColor: '#dce8f5', padding: '100px 0' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-16 text-center">
-              Nuestros valores
-            </h2>
+            <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+              <p
+                style={{
+                  fontSize: '18px',
+                  fontWeight: 700,
+                  color: '#d4a843',
+                  letterSpacing: '3px',
+                  textTransform: 'uppercase',
+                  marginBottom: '12px',
+                }}
+              >
+                Lo que nos define
+              </p>
+              <h2
+                style={{
+                  fontSize: 'clamp(28px, 4vw, 38px)',
+                  fontWeight: 800,
+                  color: '#0a2a6e',
+                }}
+              >
+                Nuestros valores
+              </h2>
+              <div
+                style={{
+                  width: '60px',
+                  height: '4px',
+                  background: 'linear-gradient(90deg, #0a2a6e, #1565c0)',
+                  borderRadius: '2px',
+                  margin: '20px auto 0',
+                }}
+              />
+            </div>
           </FadeUp>
+
           <StaggerGrid className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {valores.map((valor) => (
               <StaggerItem key={valor.titulo}>
-                <div className="flex flex-col items-center text-center">
-                  <ScaleUp>
-                    <div className="w-16 h-16 border-2 border-white/40 rounded-full flex items-center justify-center mb-4">
-                      <valor.icon className="h-8 w-8 text-white" />
+                <div className="value-card">
+                  <div className="value-card-inner">
+                    {/* Front */}
+                    <div className="value-card-front">
+                      <div
+                        style={{
+                          width: '88px',
+                          height: '88px',
+                          borderRadius: '50%',
+                          backgroundColor: '#e8f0fb',
+                          border: '2px solid #c0d4ec',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <valor.icon style={{ width: '40px', height: '40px', color: '#0a2a6e' }} />
+                      </div>
+                      <p style={{ fontSize: '18px', fontWeight: 800, color: '#0a2a6e', letterSpacing: '0.5px' }}>
+                        {valor.titulo}
+                      </p>
+                      <p style={{ fontSize: '12px', color: '#0a2a6e', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                        Pase el cursor →
+                      </p>
                     </div>
-                  </ScaleUp>
-                  <h3 className="text-white font-bold text-lg mb-2">{valor.titulo}</h3>
-                  <p className="text-white/75 leading-relaxed">{valor.texto}</p>
-                </div>
-              </StaggerItem>
-            ))}
-          </StaggerGrid>
-        </div>
-      </section>
 
-      {/* ============================================ */}
-      {/* SECTION 6 — PREGUNTAS FRECUENTES            */}
-      {/* ============================================ */}
-      <section className="bg-blue-mid py-16 sm:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <FadeUp>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-12">
-              Preguntas Frecuentes
-            </h2>
-          </FadeUp>
-          <StaggerGrid className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {faqs.map((faq) => (
-              <StaggerItem key={faq}>
-                <div className="bg-navy/60 border border-white/10 rounded-xl p-5 backdrop-blur-sm">
-                  <h3 className="text-white font-bold text-sm uppercase tracking-wide mb-4 text-center">
-                    {faq}
-                  </h3>
-                  <div className="aspect-video bg-navy-dark/80 rounded-lg flex items-center justify-center cursor-pointer hover:bg-navy-dark/60 transition-colors">
-                    <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center">
-                      <Play className="h-7 w-7 text-white ml-1" fill="white" />
+                    {/* Back */}
+                    <div className="value-card-back">
+                      <valor.icon style={{ width: '36px', height: '36px', color: '#7eb8f7' }} />
+                      <p style={{ fontSize: '17px', fontWeight: 800, color: '#d4a843', letterSpacing: '0.5px' }}>
+                        {valor.titulo}
+                      </p>
+                      <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.92)', lineHeight: 1.8, textAlign: 'center' }}>
+                        {valor.texto}
+                      </p>
                     </div>
                   </div>
                 </div>
               </StaggerItem>
             ))}
           </StaggerGrid>
-
-          <FadeUp delay={0.3}>
-            <div className="flex justify-center mt-10">
-              <a
-                href="/registro"
-                className="inline-block px-10 py-4 bg-white text-navy-dark font-bold rounded-lg hover:bg-white/90 transition-colors text-base sm:text-lg uppercase tracking-wide"
-              >
-                ÚNETE A NOSOTROS
-              </a>
-            </div>
-          </FadeUp>
         </div>
       </section>
 
       {/* ============================================ */}
-      {/* SECTION 7 — FORMULARIO COTIZACIÓN            */}
-      {/* ============================================ */}
-      <section id="contacto" className="bg-blue-light py-16 sm:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <FadeUp>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-12">
-              Formulario cotización
-            </h2>
-          </FadeUp>
-          <ScaleUp delay={0.2}>
-            <div className="bg-navy/40 backdrop-blur-sm rounded-2xl p-6 sm:p-10 max-w-2xl mx-auto border border-white/10">
-              <CotizacionForm />
-            </div>
-          </ScaleUp>
-        </div>
-      </section>
-
-      {/* ============================================ */}
-      {/* SECTION 8 — CLIENTES / MARCAS (GALERÍA)     */}
+      {/* SECTION 7 — CLIENTES / MARCAS (GALERÍA)     */}
       {/* ============================================ */}
       <section className="bg-blue-mid py-16 sm:py-20 overflow-hidden">
         <FadeUp>
@@ -353,13 +458,13 @@ export default function HomePage() {
                   key={`${cliente.nombre}-${i}`}
                   className="flex items-center justify-center px-10 sm:px-14"
                 >
-                  <div className="w-36 h-20 sm:w-44 sm:h-24 flex items-center justify-center">
+                  <div className="flex items-center justify-center" style={{ width: cliente.w ?? 288, height: cliente.h ?? 160 }}>
                     <Image
                       src={cliente.logo}
                       alt={cliente.nombre}
                       width={180}
                       height={100}
-                      className="max-w-full max-h-full object-contain opacity-80 hover:opacity-100 transition-opacity"
+                      className="max-w-full max-h-full object-contain"
                     />
                   </div>
                 </div>
@@ -370,7 +475,7 @@ export default function HomePage() {
       </section>
 
       {/* ============================================ */}
-      {/* SECTION 9 — OPERACIÓN NACIONAL              */}
+      {/* SECTION 8 — OPERACIÓN NACIONAL              */}
       {/* ============================================ */}
       <section className="bg-navy py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -411,7 +516,7 @@ export default function HomePage() {
       {/* ============================================ */}
       {/* FOOTER                                      */}
       {/* ============================================ */}
-      <footer className="bg-navy-dark py-12">
+      <footer id="contacto" className="bg-navy-dark py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <GrowLine className="h-1 bg-gold rounded mb-10" />
 

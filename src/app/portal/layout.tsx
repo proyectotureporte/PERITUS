@@ -8,7 +8,11 @@ import { LogOut } from 'lucide-react';
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  if (pathname === '/portal/login' || pathname === '/portal/change-password') {
+  if (
+    pathname === '/portal/login' ||
+    pathname === '/portal/change-password' ||
+    pathname === '/portal/cotizaciones'
+  ) {
     return <>{children}</>;
   }
 
@@ -18,9 +22,14 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
 function PortalAuthLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
+    if (pathname === '/portal/cotizaciones') {
+      setChecked(true);
+      return;
+    }
     if (loading) return;
     if (!user || user.role !== 'cliente') {
       router.replace('/portal/login');
@@ -29,7 +38,11 @@ function PortalAuthLayout({ children }: { children: React.ReactNode }) {
     } else {
       setChecked(true);
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, pathname]);
+
+  if (pathname === '/portal/cotizaciones') {
+    return <>{children}</>;
+  }
 
   if (loading || !checked) {
     return (
