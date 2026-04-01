@@ -1,15 +1,14 @@
 import Image from 'next/image';
-import { Phone, Mail, MapPinned, Calculator, Database, User, Users, Building2, Briefcase, Share2, GitBranch } from 'lucide-react';
+import { Calculator, Database, User, Users, Building2, Briefcase, Share2, GitBranch } from 'lucide-react';
 import Header from '@/components/landing/Header';
+import Footer from '@/components/landing/Footer';
 import CotizacionForm from '@/components/landing/CotizacionForm';
 import {
   FadeUp,
-  FadeIn,
   ScaleUp,
   StaggerGrid,
   StaggerItem,
   HeroFadeUp,
-  GrowLine,
 } from '@/components/landing/Animations';
 
 
@@ -303,68 +302,7 @@ export default function EmpresaPage() {
         </div>
       </section>
 
-      {/* ============================================ */}
-      {/* FOOTER                                      */}
-      {/* ============================================ */}
-      <footer className="bg-navy-dark py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <GrowLine className="h-1 bg-gold rounded mb-10" />
-
-          <FadeIn>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-start">
-              <div>
-                <Image
-                  src="/LOGO.png"
-                  alt="Peritus"
-                  width={200}
-                  height={67}
-                  className="h-14 w-auto brightness-0 invert"
-                />
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 text-white/80">
-                  <Phone className="h-4 w-4 flex-shrink-0" />
-                  <span>3128462934</span>
-                </div>
-                <div className="flex items-center gap-3 text-white/80">
-                  <Mail className="h-4 w-4 flex-shrink-0" />
-                  <span>contacto@cnp.com.co</span>
-                </div>
-                <div className="flex items-center gap-3 text-white/80">
-                  <MapPinned className="h-4 w-4 flex-shrink-0" />
-                  <span>Carrera 101 17-53, Cali.</span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 md:justify-end">
-                {[
-                  { label: 'Fb', href: '#' },
-                  { label: 'Ig', href: '#' },
-                  { label: 'Lin', href: '#' },
-                  { label: 'X', href: '#' },
-                ].map((social) => (
-                  <a
-                    key={social.label}
-                    href={social.href}
-                    className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white text-xs font-bold hover:bg-white/20 transition-colors"
-                    aria-label={social.label}
-                  >
-                    {social.label}
-                  </a>
-                ))}
-              </div>
-            </div>
-          </FadeIn>
-
-          <div className="mt-10 pt-6 border-t border-white/10 text-center text-white/50 text-sm">
-            <p>
-              &copy; {new Date().getFullYear()} PERITUS - Centro Nacional de
-              Pruebas. Todos los derechos reservados.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
