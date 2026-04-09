@@ -56,7 +56,7 @@ export default function AbogadoPage() {
             </HeroFadeUp>
             <HeroFadeUp delay={0.65}>
               <a
-                href="/registro"
+                href="#contacto"
                 className="inline-block px-10 py-4 bg-gold text-white font-bold rounded-lg hover:opacity-90 transition-opacity text-base sm:text-lg uppercase tracking-widest"
               >
                 ÚNETE
