@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSanityClient } from '@/lib/sanity/client'
 import bcrypt from 'bcryptjs'
+import { withTransaction, newId } from '@/lib/db'
+import { findDuplicate, getLatestPeritusId } from '@/lib/db/registroPeritus'
+import { uploadFile } from '@/lib/sanity/assets'
 import { sendCredentialsEmail } from '@/lib/email'
 
-async function generateNextId(client: ReturnType<typeof getSanityClient>): Promise<string> {
-  const query = `*[_type == "registroPeritus"] | order(fechaRegistro desc)[0]{ peritusId }`
-  const last = await client.fetch(query)
-  if (!last?.peritusId) return 'PER-0001'
-  const match = last.peritusId.match(/PER-(\d+)/)
+function nextPeritusId(last: string | null): string {
+  if (!last) return 'PER-0001'
+  const match = last.match(/PER-(\d+)/)
   if (!match) return 'PER-0001'
   return `PER-${String(parseInt(match[1], 10) + 1).padStart(4, '0')}`
 }
@@ -47,13 +47,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'La contraseña debe tener al menos 6 caracteres' }, { status: 400 })
     }
 
-    const client = getSanityClient()
-
-    // Check duplicate in registroPeritus
-    const existing = await client.fetch(
-      `*[_type == "registroPeritus" && (cedula == $cedula || correo == $correo)][0]{ cedula, correo }`,
-      { cedula, correo }
-    )
+    // Check duplicate in registro_peritus
+    const existing = await findDuplicate(cedula, correo)
     if (existing) {
       const msg = existing.cedula === cedula
         ? 'Ya existe un registro con esta cédula'
@@ -62,95 +57,76 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate PERITUS ID
-    const peritusId = await generateNextId(client)
+    const peritusId = nextPeritusId(await getLatestPeritusId())
 
-    // Upload CV if provided
-    let hojaDeVidaAsset = null
+    // Upload CV to Sanity CDN (los archivos siguen en el CDN tras la migración)
+    let cvFile: { url: string | null; assetId: string; name: string | null; mime: string | null; size: number | null } | null = null
     if (hojaDeVida && hojaDeVida.size > 0) {
       if (hojaDeVida.size > 5 * 1024 * 1024) {
         return NextResponse.json({ error: 'La hoja de vida no puede superar 5MB' }, { status: 400 })
       }
       const buffer = Buffer.from(await hojaDeVida.arrayBuffer())
-      const asset = await client.assets.upload('file', buffer, {
-        filename: hojaDeVida.name,
-        contentType: hojaDeVida.type,
-      })
-      hojaDeVidaAsset = { _type: 'file', asset: { _type: 'reference', _ref: asset._id } }
+      const asset = await uploadFile(buffer, hojaDeVida.name, hojaDeVida.type)
+      cvFile = { url: asset.url, assetId: asset.assetId, name: asset.originalFilename, mime: asset.mimeType, size: asset.size }
     }
 
-    // ============================================================
-    // STEP 1: Create crmClient (same flow as CNP CRM)
-    // ============================================================
-    const newCrmClient = await client.create({
-      _type: 'crmClient',
-      brand: 'Peritus',
-      name: nombreApellido,
-      email: correo,
-      phone: celular,
-      company: '',
-      position: cargo,
-      notes: `Profesión: ${profesionOficio} | Especialidad: ${especialidad} | Experiencia: ${experiencia}`,
-      status: 'prospecto',
-      createdBy: 'Registro Web PERITUS',
-    })
-
-    // ============================================================
-    // STEP 2: Create or update crmUser (portal access)
-    // ============================================================
-    const clientIdSuffix = newCrmClient._id.slice(-4)
-    const portalPassword = `CNP${clientIdSuffix}`
-    const passwordHash = await bcrypt.hash(portalPassword, 10)
-
-    const existingUser = await client.fetch<{ _id: string } | null>(
-      `*[_type == "crmUser" && email == $email && active == true][0]{ _id }`,
-      { email: correo }
-    )
-
-    if (existingUser) {
-      await client.patch(existingUser._id).set({ passwordHash, mustChangePassword: true }).commit()
-    } else {
-      await client.create({
-        _type: 'crmUser',
-        username: correo,
-        email: correo,
-        displayName: nombreApellido,
-        phone: celular,
-        passwordHash,
-        role: 'cliente',
-        active: true,
-        mustChangePassword: true,
-      })
-    }
-
-    // ============================================================
-    // STEP 3: Create registroPeritus document (extra fields)
-    // ============================================================
+    // IDs y credenciales del portal (mismo flujo que CNP)
+    const clientId = newId()
+    const portalPassword = `CNP${clientId.slice(-4)}`
+    const portalPasswordHash = await bcrypt.hash(portalPassword, 10)
     const contrasenaHash = await bcrypt.hash(contrasena, 10)
 
-    await client.create({
-      _type: 'registroPeritus',
-      peritusId,
-      nombreApellido,
-      cedula,
-      correo,
-      celular,
-      ciudad,
-      profesionOficio,
-      cargo,
-      experiencia,
-      especialidad,
-      edad,
-      fechaRegistro: new Date().toISOString(),
-      estadoDocumentacion: 'pendiente',
-      activo: true,
-      contrasenaHash,
-      clientRef: { _type: 'reference', _ref: newCrmClient._id },
-      ...(hojaDeVidaAsset && { hojaDeVida: hojaDeVidaAsset }),
+    await withTransaction(async (db) => {
+      // STEP 1: crm_client
+      await db.query(
+        `INSERT INTO crm_client (id, brand, name, email, phone, company, position, notes, status, created_by)
+         VALUES ($1, 'Peritus', $2, $3, $4, '', $5, $6, 'prospecto', 'Registro Web PERITUS')`,
+        [
+          clientId, nombreApellido, correo, celular, cargo,
+          `Profesión: ${profesionOficio} | Especialidad: ${especialidad} | Experiencia: ${experiencia}`,
+        ],
+      )
+
+      // STEP 2: crm_user (acceso portal) — crear o actualizar contraseña si ya existe
+      const found = await db.query(
+        `SELECT id FROM crm_user WHERE lower(email) = lower($1) AND active = TRUE LIMIT 1`,
+        [correo],
+      )
+      if (found.rows.length > 0) {
+        await db.query(
+          `UPDATE crm_user SET password_hash = $1, must_change_password = TRUE WHERE id = $2`,
+          [portalPasswordHash, found.rows[0].id],
+        )
+      } else {
+        await db.query(
+          `INSERT INTO crm_user (id, username, email, display_name, phone, password_hash, role, active, must_change_password)
+           VALUES ($1, $2, $2, $3, $4, $5, 'cliente', TRUE, TRUE)`,
+          [newId(), correo, nombreApellido, celular, portalPasswordHash],
+        )
+      }
+
+      // STEP 3: registro_peritus
+      await db.query(
+        `INSERT INTO registro_peritus (
+           id, peritus_id, nombre_apellido, cedula, correo, celular, ciudad,
+           profesion_oficio, cargo, experiencia, especialidad, edad,
+           file_url, file_asset_id, file_name, mime_type, file_size,
+           fecha_registro, estado_documentacion, activo, contrasena_hash, client_id
+         ) VALUES (
+           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,
+           $13, $14, $15, $16, $17, now(), 'pendiente', TRUE, $18, $19
+         )`,
+        [
+          newId(), peritusId, nombreApellido, cedula, correo, celular, ciudad,
+          profesionOficio, cargo, experiencia, especialidad, edad,
+          cvFile?.url ?? null, cvFile?.assetId ?? null, cvFile?.name ?? null,
+          cvFile?.mime ?? null, cvFile?.size ?? null,
+          contrasenaHash, clientId,
+        ],
+      )
     })
 
-    // ============================================================
-    // STEP 4: Send credentials email (fire-and-forget, same as CNP)
-    // ============================================================
+    // STEP 4: email de credenciales (fire-and-forget, igual que CNP)
     sendCredentialsEmail({
       to: correo,
       clientName: nombreApellido,

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { client, writeClient } from '@/lib/sanity/client';
-import { listClientVisibleDocumentsQuery, getCaseByIdQuery } from '@/lib/sanity/queries';
+import { listClientVisibleDocuments, createCaseDocument } from '@/lib/db/caseDocument';
+import { getCaseById } from '@/lib/db/cases';
+import { uploadFile } from '@/lib/sanity/assets';
 import { verifyClientOwnsCase } from '@/lib/auth/clientAccess';
-import { DOCUMENT_CATEGORY_LABELS, type DocumentCategory, type CaseExpanded } from '@/lib/types';
+import { DOCUMENT_CATEGORY_LABELS, type DocumentCategory } from '@/lib/types';
 import { logCaseEvent } from '@/lib/sanity/logEvent';
 
 export async function GET(
@@ -19,7 +20,7 @@ export async function GET(
       if (!owns) {
         return NextResponse.json({ success: false, error: 'No tiene acceso a este caso' }, { status: 403 });
       }
-      const documents = await client.fetch(listClientVisibleDocumentsQuery, { caseId: id });
+      const documents = await listClientVisibleDocuments(id);
       return NextResponse.json({ success: true, data: documents });
     }
 
@@ -46,7 +47,7 @@ export async function POST(
       }
     }
 
-    const existing = await client.fetch<CaseExpanded | null>(getCaseByIdQuery, { id });
+    const existing = await getCaseById(id);
     if (!existing) {
       return NextResponse.json({ success: false, error: 'Caso no encontrado' }, { status: 404 });
     }
@@ -54,7 +55,7 @@ export async function POST(
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
     const description = (formData.get('description') as string) || '';
-    const category = 'soporte_tecnico';
+    const category: DocumentCategory = 'soporte_tecnico';
 
     if (!file) {
       return NextResponse.json({ success: false, error: 'Archivo requerido' }, { status: 400 });
@@ -65,32 +66,24 @@ export async function POST(
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const asset = await writeClient.assets.upload('file', buffer, {
-      filename: file.name,
-      contentType: file.type,
-    });
+    const asset = await uploadFile(buffer, file.name, file.type);
 
-    const doc: { _type: 'caseDocument'; [key: string]: unknown } = {
-      _type: 'caseDocument',
-      case: { _type: 'reference', _ref: id },
+    const created = await createCaseDocument({
+      caseId: id,
+      uploadedById: userId,
+      uploadedByName: userName || 'Cliente',
       category,
+      fileUrl: asset.url,
+      fileAssetId: asset.assetId,
       fileName: file.name,
-      fileSize: file.size,
       mimeType: file.type,
+      fileSize: file.size,
       version: 1,
       isVisibleToClient: true,
       description,
-      uploadedByName: userName || 'Cliente',
-      file: { _type: 'file', asset: { _type: 'reference', _ref: asset._id } },
-    };
+    });
 
-    if (userId && userId !== 'admin') {
-      doc.uploadedBy = { _type: 'reference', _ref: userId };
-    }
-
-    const created = await writeClient.create(doc);
-
-    const catLabel = DOCUMENT_CATEGORY_LABELS[category as DocumentCategory] || category;
+    const catLabel = DOCUMENT_CATEGORY_LABELS[category] || category;
     logCaseEvent({
       caseId: id,
       eventType: 'document_uploaded',

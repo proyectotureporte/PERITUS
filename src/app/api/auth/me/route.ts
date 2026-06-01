@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth/jwt';
-import { client } from '@/lib/sanity/client';
-import { getCrmUserByIdQuery } from '@/lib/sanity/queries';
 
 export async function GET(request: NextRequest) {
   const token = request.cookies.get('crm-token')?.value;

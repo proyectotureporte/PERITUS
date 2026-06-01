@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getSanityClient } from '@/lib/sanity/client';
+import { createCotizacion } from '@/lib/db/cotizacion';
 
 const cotizacionSchema = z.object({
   nombre: z.string().min(2, 'Nombre requerido'),
@@ -23,27 +23,9 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!process.env.SANITY_PROJECT_ID || !process.env.SANITY_API_TOKEN) {
-      return NextResponse.json(
-        { error: 'Sanity no está configurado. Configure SANITY_PROJECT_ID y SANITY_API_TOKEN.' },
-        { status: 500 }
-      );
-    }
+    const id = await createCotizacion(result.data);
 
-    const sanityClient = getSanityClient();
-    const doc = await sanityClient.create({
-      _type: 'cotizacion',
-      nombre: result.data.nombre,
-      email: result.data.email,
-      telefono: result.data.telefono,
-      tipoPeritaje: result.data.tipoPeritaje,
-      ciudad: result.data.ciudad,
-      descripcion: result.data.descripcion,
-      fechaCreacion: new Date().toISOString(),
-      estado: 'pendiente',
-    });
-
-    return NextResponse.json({ success: true, id: doc._id });
+    return NextResponse.json({ success: true, id });
   } catch (error) {
     console.error('Error al crear cotización:', error);
     return NextResponse.json(

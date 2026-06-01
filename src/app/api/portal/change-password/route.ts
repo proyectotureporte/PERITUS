@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken, signToken } from '@/lib/auth/jwt';
-import { writeClient } from '@/lib/sanity/client';
+import { setContrasenaHash } from '@/lib/db/registroPeritus';
 import { hashPassword } from '@/lib/auth/passwords';
 
 export async function POST(request: NextRequest) {
@@ -27,11 +27,8 @@ export async function POST(request: NextRequest) {
 
     const passwordHash = await hashPassword(newPassword);
 
-    // sub es registroPeritus._id — actualiza contrasenaHash ahí
-    await writeClient
-      .patch(payload.sub)
-      .set({ contrasenaHash: passwordHash })
-      .commit();
+    // sub es registroPeritus.id — actualiza contrasena_hash ahí
+    await setContrasenaHash(payload.sub, passwordHash);
 
     // Re-sign token with same data
     const newToken = await signToken({

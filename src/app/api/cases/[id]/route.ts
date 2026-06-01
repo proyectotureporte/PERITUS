@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { client } from '@/lib/sanity/client';
-import { getCaseByIdQuery } from '@/lib/sanity/queries';
+import { getCaseById } from '@/lib/db/cases';
 import { verifyClientOwnsCase } from '@/lib/auth/clientAccess';
-import type { CaseExpanded } from '@/lib/types';
 
 export async function GET(
   request: NextRequest,
@@ -12,7 +10,7 @@ export async function GET(
     const { id } = await params;
     const userRole = request.headers.get('x-user-role') || '';
     const userId = request.headers.get('x-user-id') || '';
-    const caseData = await client.fetch<CaseExpanded | null>(getCaseByIdQuery, { id });
+    const caseData = await getCaseById(id);
 
     if (!caseData) {
       return NextResponse.json({ success: false, error: 'Caso no encontrado' }, { status: 404 });

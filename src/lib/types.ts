@@ -145,6 +145,48 @@ export interface CrmUser extends SanityDocument {
   companyRef?: { _ref: string; _type: 'reference' };
 }
 
+// ============================================
+// REGISTRO PERITUS (portal)
+// ============================================
+
+export type PeritusDocStatus = 'pendiente' | 'revision' | 'aprobado' | 'denegado';
+
+export interface PeritusRegistro {
+  _id: string;
+  peritusId?: string;
+  nombreApellido?: string;
+  cedula?: string;
+  correo?: string;
+  celular?: string;
+  ciudad?: string;
+  profesionOficio?: string;
+  cargo?: string;
+  experiencia?: string;
+  especialidad?: string;
+  edad?: string;
+  hojaDeVidaUrl?: string;
+  estadoDocumentacion?: PeritusDocStatus;
+  notasValidacion?: string;
+  fechaRegistro?: string;
+}
+
+// ============================================
+// COTIZACION (solicitud pública)
+// ============================================
+
+export interface Cotizacion {
+  _id: string;
+  _createdAt: string;
+  nombre: string;
+  email: string;
+  telefono: string;
+  tipoPeritaje: string;
+  ciudad: string;
+  descripcion: string;
+  fechaCreacion?: string;
+  estado: string;
+}
+
 export interface CrmClient extends SanityDocument {
   _type: 'crmClient';
   brand: 'CNP' | 'Peritus';

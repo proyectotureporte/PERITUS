@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { client } from '@/lib/sanity/client';
-import { listCaseQuotesQuery } from '@/lib/sanity/queries';
+import { listCaseQuotes } from '@/lib/db/quote';
 import { verifyClientOwnsCase } from '@/lib/auth/clientAccess';
-import type { Quote } from '@/lib/types';
 
 export async function GET(
   request: NextRequest,
@@ -20,7 +18,7 @@ export async function GET(
       }
     }
 
-    const quotes = await client.fetch<Quote[]>(listCaseQuotesQuery, { caseId: id });
+    const quotes = await listCaseQuotes(id);
     return NextResponse.json({ success: true, data: quotes });
   } catch {
     return NextResponse.json({ success: false, error: 'Error obteniendo cotizaciones' }, { status: 500 });

@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { client } from '@/lib/sanity/client';
-import { listCasesForClientQuery } from '@/lib/sanity/queries';
+import { listCasesForClient } from '@/lib/db/cases';
 import { getClientIdForUser } from '@/lib/auth/clientAccess';
-import type { CaseExpanded } from '@/lib/types';
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,7 +12,7 @@ export async function GET(request: NextRequest) {
       if (!clientId) {
         return NextResponse.json({ success: true, data: [], meta: { total: 0, page: 1, limit: 20, totalPages: 0 } });
       }
-      const cases = await client.fetch<CaseExpanded[]>(listCasesForClientQuery, { clientId });
+      const cases = await listCasesForClient(clientId);
       return NextResponse.json({ success: true, data: cases, meta: { total: cases.length, page: 1, limit: cases.length, totalPages: 1 } });
     }
 

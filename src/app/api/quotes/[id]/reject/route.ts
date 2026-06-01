@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { client, writeClient } from '@/lib/sanity/client';
-import { getQuoteByIdQuery } from '@/lib/sanity/queries';
+import { getQuoteById, updateQuote } from '@/lib/db/quote';
 import { logCaseEvent } from '@/lib/sanity/logEvent';
 import type { Quote } from '@/lib/types';
 
@@ -17,7 +16,7 @@ export async function POST(
     const body = await request.json();
     const { rejectionReason } = body;
 
-    const existing = await client.fetch<QuoteWithCase | null>(getQuoteByIdQuery, { id });
+    const existing = (await getQuoteById(id)) as QuoteWithCase | null;
     if (!existing) {
       return NextResponse.json({ success: false, error: 'Cotizacion no encontrada' }, { status: 404 });
     }
@@ -30,7 +29,7 @@ export async function POST(
       return NextResponse.json({ success: false, error: 'La razon de rechazo es requerida' }, { status: 400 });
     }
 
-    const updated = await writeClient.patch(id).set({ status: 'rechazada', rejectionReason }).commit();
+    const updated = await updateQuote(id, { status: 'rechazada', rejectionReason });
 
     if (existing.case?._id) {
       await logCaseEvent({

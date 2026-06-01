@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { client } from '@/lib/sanity/client';
-import { listCaseEventsQuery } from '@/lib/sanity/queries';
+import { listCaseEvents } from '@/lib/db/caseEvent';
 import { verifyClientOwnsCase } from '@/lib/auth/clientAccess';
-import type { CaseEvent } from '@/lib/types';
 
 export async function GET(
   request: NextRequest,
@@ -20,7 +18,7 @@ export async function GET(
       }
     }
 
-    const events = await client.fetch<CaseEvent[]>(listCaseEventsQuery, { caseId: id });
+    const events = await listCaseEvents(id);
     return NextResponse.json({ success: true, data: events });
   } catch {
     return NextResponse.json({ success: false, error: 'Error obteniendo eventos' }, { status: 500 });
