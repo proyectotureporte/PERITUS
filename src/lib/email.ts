@@ -6,6 +6,60 @@ function getResend() {
   return _resend
 }
 
+/**
+ * Email de bienvenida para un perito recién registrado en PERITUS.
+ * NO incluye contraseña: el perito accede con su correo y la contraseña que
+ * eligió en el formulario de registro (no se genera ninguna automática).
+ */
+export async function sendPeritusWelcomeEmail({
+  to,
+  nombre,
+  peritusId,
+}: {
+  to: string
+  nombre: string
+  peritusId: string
+}) {
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('[email] RESEND_API_KEY not configured, skipping email')
+    return null
+  }
+
+  const emailFrom = process.env.EMAIL_FROM || 'Peritus <contacto@peritus.com.co>'
+  const replyTo = process.env.EMAIL_REPLY_TO || 'contacto@peritus.com.co'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://peritus.com.co'
+  const portalUrl = `${baseUrl}/portal/login`
+
+  const { data, error } = await getResend().emails.send({
+    from: emailFrom,
+    to,
+    replyTo,
+    subject: 'Bienvenido al Portal de Peritos | PERITUS',
+    text: `Bienvenido a PERITUS\n\nHola ${nombre},\n\nTu registro como perito se completó correctamente. Tu codigo PERITUS es ${peritusId}.\n\nYa puedes acceder al portal de peritos con tu correo electronico (${to}) y la contrasena que elegiste durante el registro.\n\nAccede aqui: ${portalUrl}\n\nPERITUS | Centro Nacional de Pruebas`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #0a2a6e;">Bienvenido a PERITUS</h2>
+        <p>Hola <strong>${nombre}</strong>,</p>
+        <p>Tu registro como perito se complet&oacute; correctamente.</p>
+        <div style="background: #f4f4f5; border-radius: 8px; padding: 16px; margin: 16px 0;">
+          <p style="margin: 4px 0;"><strong>Tu c&oacute;digo PERITUS:</strong> <code style="background: #e4e4e7; padding: 2px 6px; border-radius: 4px;">${peritusId}</code></p>
+        </div>
+        <p>Ya puedes acceder al portal de peritos con tu <strong>correo electr&oacute;nico</strong> (${to}) y la <strong>contrase&ntilde;a que elegiste</strong> durante el registro.</p>
+        <p><a href="${portalUrl}" style="display:inline-block;background:#d4a843;color:#0a2a6e;font-weight:bold;padding:10px 20px;border-radius:8px;text-decoration:none;">Iniciar sesi&oacute;n</a></p>
+        <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 24px 0;" />
+        <p style="color: #999; font-size: 12px;">Este es un correo autom&aacute;tico de PERITUS | Centro Nacional de Pruebas.</p>
+      </div>
+    `,
+  })
+
+  if (error) {
+    console.error('[email] Error sending welcome email:', error)
+    return null
+  }
+
+  return data
+}
+
 export async function sendCredentialsEmail({
   to,
   clientName,

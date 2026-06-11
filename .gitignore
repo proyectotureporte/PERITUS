@@ -45,3 +45,8 @@ next-env.d.ts
 *.mov
 *.avi
 *.mkv
+
+# qa (app-qa) artifacts — no commitear
+qa-run.mjs
+qa-cotizacion.mjs
+qa-results/

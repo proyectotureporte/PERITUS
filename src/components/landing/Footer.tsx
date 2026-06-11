@@ -36,9 +36,9 @@ const socials = [
   },
 ];
 
-export default function Footer() {
+export default function Footer({ id }: { id?: string } = {}) {
   return (
-    <footer className="bg-navy-dark py-12">
+    <footer id={id} className="bg-navy-dark py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <GrowLine className="h-1 bg-gold rounded mb-10" />
 

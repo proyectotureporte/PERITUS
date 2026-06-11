@@ -520,7 +520,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <Footer />
+      <Footer id="contacto" />
     </div>
   );
 }

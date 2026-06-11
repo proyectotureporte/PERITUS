@@ -13,7 +13,12 @@ const cotizacionSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Cuerpo de la petición inválido' }, { status: 400 });
+    }
     const result = cotizacionSchema.safeParse(body);
 
     if (!result.success) {

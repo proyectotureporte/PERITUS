@@ -61,11 +61,17 @@ export async function findDuplicate(
   );
 }
 
-/** Último peritusId (PER-XXXX) por fecha de registro, para auto-numerar. */
-export async function getLatestPeritusId(): Promise<string | null> {
+/**
+ * Mayor peritus_id NUMÉRICO (formato `PER-####`) para auto-numerar el siguiente.
+ * Ordena por el valor entero del sufijo, no por fecha ni lexicográficamente, e
+ * IGNORA los ids no numéricos heredados de la migración de Sanity (p. ej.
+ * `PER-V1ADZA`). Así el siguiente id nunca colisiona con uno ya existente.
+ */
+export async function getMaxNumericPeritusId(): Promise<string | null> {
   const row = await queryOne<{ peritusId: string | null }>(
     `SELECT peritus_id AS "peritusId" FROM registro_peritus
-     WHERE peritus_id IS NOT NULL ORDER BY fecha_registro DESC NULLS LAST LIMIT 1`,
+     WHERE peritus_id ~ '^PER-[0-9]+$'
+     ORDER BY (substring(peritus_id from 5))::int DESC LIMIT 1`,
   );
   return row?.peritusId ?? null;
 }

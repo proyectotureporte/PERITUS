@@ -5,12 +5,13 @@ import { signToken } from '@/lib/auth/jwt';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { email, password: rawPassword, type } = body as {
-      email?: string;
-      password: string;
-      type: 'portal';
-    };
+    let body: { email?: string; password?: string; type?: string };
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ success: false, error: 'Cuerpo de la peticion invalido' }, { status: 400 });
+    }
+    const { email, password: rawPassword, type } = body;
 
     const password = rawPassword?.trim();
 

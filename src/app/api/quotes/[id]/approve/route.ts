@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getQuoteById, updateQuote } from '@/lib/db/quote';
 import { logCaseEvent } from '@/lib/sanity/logEvent';
+import { verifyClientOwnsCase } from '@/lib/auth/clientAccess';
 import type { Quote } from '@/lib/types';
 
 type QuoteWithCase = Quote & { case?: { _id: string; caseCode: string; title: string } };
@@ -13,10 +14,22 @@ export async function POST(
     const { id } = await params;
     const userId = request.headers.get('x-user-id');
     const userName = request.headers.get('x-user-name');
+    const userRole = request.headers.get('x-user-role') || '';
 
     const existing = (await getQuoteById(id)) as QuoteWithCase | null;
     if (!existing) {
       return NextResponse.json({ success: false, error: 'Cotizacion no encontrada' }, { status: 404 });
+    }
+
+    // Un cliente solo puede aprobar cotizaciones de SUS propios casos.
+    if (userRole === 'cliente') {
+      const caseId = existing.case?._id;
+      const { owns } = caseId
+        ? await verifyClientOwnsCase(userId || '', caseId)
+        : { owns: false };
+      if (!owns) {
+        return NextResponse.json({ success: false, error: 'No tiene acceso a esta cotizacion' }, { status: 403 });
+      }
     }
 
     if (existing.status !== 'enviada') {
