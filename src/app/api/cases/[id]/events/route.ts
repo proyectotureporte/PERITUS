@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { listCaseEvents } from '@/lib/db/caseEvent';
-import { verifyClientOwnsCase } from '@/lib/auth/clientAccess';
+import { verifyExpertOwnsCase } from '@/lib/auth/clientAccess';
 
 export async function GET(
   request: NextRequest,
@@ -12,7 +12,7 @@ export async function GET(
     const userId = request.headers.get('x-user-id') || '';
 
     if (userRole === 'cliente') {
-      const { owns } = await verifyClientOwnsCase(userId, id);
+      const { owns } = await verifyExpertOwnsCase(userId, id);
       if (!owns) {
         return NextResponse.json({ success: false, error: 'No tiene acceso a este caso' }, { status: 403 });
       }

@@ -1,32 +1,34 @@
 import { queryOne } from '@/lib/db';
-import { getClientIdForRegistro } from '@/lib/db/registroPeritus';
+import { getExpertUserIdForRegistro } from '@/lib/db/registroPeritus';
 
 /**
- * El `sub` del JWT del portal es `registroPeritus.id`; `client_id` apunta al
- * crm_client asociado. Resuelve el clientId del usuario del portal.
+ * El `sub` del JWT del portal es `registroPeritus.id`. Cada perito tiene una
+ * cuenta `crm_user` (rol 'perito') vinculada en `registro_peritus.user_id`, y es
+ * ese id el que figura en `cases.assigned_expert_id`. Resuelve el id de
+ * usuario-perito del usuario del portal.
  */
-export async function getClientIdForUser(userId: string): Promise<string | null> {
-  return getClientIdForRegistro(userId);
+export async function getExpertUserIdForUser(userId: string): Promise<string | null> {
+  return getExpertUserIdForRegistro(userId);
 }
 
 /**
- * Verifica que el usuario del portal sea dueño del caso
- * (cases.client_id == su clientId).
+ * Verifica que el usuario del portal (perito) sea el experto asignado al caso
+ * (cases.assigned_expert_id == su id de usuario-perito).
  */
-export async function verifyClientOwnsCase(
+export async function verifyExpertOwnsCase(
   userId: string,
   caseId: string,
-): Promise<{ owns: boolean; clientId: string | null }> {
-  const clientId = await getClientIdForUser(userId);
-  if (!clientId) return { owns: false, clientId: null };
+): Promise<{ owns: boolean; expertUserId: string | null }> {
+  const expertUserId = await getExpertUserIdForUser(userId);
+  if (!expertUserId) return { owns: false, expertUserId: null };
 
-  const row = await queryOne<{ client_id: string | null }>(
-    'SELECT client_id FROM cases WHERE id = $1',
+  const row = await queryOne<{ assigned_expert_id: string | null }>(
+    'SELECT assigned_expert_id FROM cases WHERE id = $1',
     [caseId],
   );
 
   return {
-    owns: row?.client_id === clientId,
-    clientId,
+    owns: row?.assigned_expert_id === expertUserId,
+    expertUserId,
   };
 }

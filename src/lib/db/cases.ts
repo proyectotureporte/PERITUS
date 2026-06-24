@@ -40,8 +40,8 @@ export async function getCaseById(id: string): Promise<CaseExpanded | null> {
   );
 }
 
-/** Portal cliente: casos del cliente con sus refs principales. */
-export async function listCasesForClient(clientId: string): Promise<CaseExpanded[]> {
+/** Portal perito: casos ASIGNADOS al perito (assigned_expert_id) con sus refs. */
+export async function listCasesForExpert(expertUserId: string): Promise<CaseExpanded[]> {
   return query<CaseExpanded>(
     `SELECT
        c.id AS "_id", c.created_at AS "_createdAt", c.updated_at AS "_updatedAt",
@@ -56,9 +56,9 @@ export async function listCasesForClient(clientId: string): Promise<CaseExpanded
      LEFT JOIN crm_client cl ON cl.id = c.client_id
      LEFT JOIN crm_user cm ON cm.id = c.commercial_id
      LEFT JOIN crm_user ae ON ae.id = c.assigned_expert_id
-     WHERE c.client_id = $1 AND c.status <> 'archivado'
+     WHERE c.assigned_expert_id = $1 AND c.status <> 'archivado'
      ORDER BY c.created_at DESC`,
-    [clientId],
+    [expertUserId],
   );
 }
 

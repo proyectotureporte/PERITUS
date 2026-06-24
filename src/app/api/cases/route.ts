@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { listCasesForClient } from '@/lib/db/cases';
-import { getClientIdForUser } from '@/lib/auth/clientAccess';
+import { listCasesForExpert } from '@/lib/db/cases';
+import { getExpertUserIdForUser } from '@/lib/auth/clientAccess';
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,11 +8,11 @@ export async function GET(request: NextRequest) {
     const userId = request.headers.get('x-user-id') || '';
 
     if (userRole === 'cliente') {
-      const clientId = await getClientIdForUser(userId);
-      if (!clientId) {
+      const expertUserId = await getExpertUserIdForUser(userId);
+      if (!expertUserId) {
         return NextResponse.json({ success: true, data: [], meta: { total: 0, page: 1, limit: 20, totalPages: 0 } });
       }
-      const cases = await listCasesForClient(clientId);
+      const cases = await listCasesForExpert(expertUserId);
       return NextResponse.json({ success: true, data: cases, meta: { total: cases.length, page: 1, limit: cases.length, totalPages: 1 } });
     }
 

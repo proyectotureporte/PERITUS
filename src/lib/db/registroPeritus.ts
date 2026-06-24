@@ -33,14 +33,14 @@ export async function getRegistroForAuth(correo: string): Promise<RegistroAuth |
   );
 }
 
-/** Portal: clientId del cliente asociado a un registroPeritus activo. */
-export async function getClientIdForRegistro(registroId: string): Promise<string | null> {
-  const row = await queryOne<{ clientId: string | null }>(
-    `SELECT client_id AS "clientId" FROM registro_peritus
+/** Portal: id del usuario-perito (crm_user) vinculado a un registroPeritus activo. */
+export async function getExpertUserIdForRegistro(registroId: string): Promise<string | null> {
+  const row = await queryOne<{ userId: string | null }>(
+    `SELECT user_id AS "userId" FROM registro_peritus
      WHERE id = $1 AND activo = TRUE`,
     [registroId],
   );
-  return row?.clientId ?? null;
+  return row?.userId ?? null;
 }
 
 /** Cambio de contraseña del portal. */
@@ -94,6 +94,7 @@ export interface RegistroPeritusInput {
   mimeType?: string | null;
   fileSize?: number | null;
   clientId?: string | null;
+  userId?: string | null;
   fechaRegistro?: string | null;
   estadoDocumentacion?: PeritusDocStatus;
   notasValidacion?: string | null;
@@ -120,6 +121,7 @@ function toColumns(input: Partial<RegistroPeritusInput>): Record<string, unknown
     mime_type: input.mimeType,
     file_size: input.fileSize,
     client_id: input.clientId,
+    user_id: input.userId,
     fecha_registro: input.fechaRegistro,
     estado_documentacion: input.estadoDocumentacion,
     notas_validacion: input.notasValidacion,

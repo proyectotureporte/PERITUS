@@ -12,6 +12,12 @@ function nextPeritusId(last: string | null): string {
   return `PER-${String(parseInt(match[1], 10) + 1).padStart(4, '0')}`
 }
 
+/** Año inferior del rango de experiencia del formulario ("2-5" → 2, "20+" → 20, "0-1" → 0). */
+function parseExperienceYears(rango: string): number {
+  const m = (rango || '').match(/\d+/)
+  return m ? parseInt(m[0], 10) : 0
+}
+
 /** Reintentos ante colisión concurrente del índice único de peritus_id. */
 const MAX_PERITUS_ID_RETRIES = 5
 function isPeritusIdCollision(e: unknown): boolean {
@@ -74,11 +80,15 @@ export async function POST(request: NextRequest) {
       cvFile = { url: asset.url, assetId: asset.assetId, name: asset.originalFilename, mime: asset.mimeType, size: asset.size }
     }
 
-    // IDs y credenciales del portal (mismo flujo que CNP)
-    const clientId = newId()
-    const portalPassword = `CNP${clientId.slice(-4)}`
+    // IDs y credenciales de acceso al CRM (rol perito). El login del PORTAL de
+    // peritus.com.co usa la contraseña ELEGIDA (registro_peritus.contrasena_hash),
+    // no esta credencial CNPxxxx (que es la cuenta crm_user del directorio).
+    const crmUserId = newId()
+    const portalPassword = `CNP${crmUserId.slice(-4)}`
     const portalPasswordHash = await bcrypt.hash(portalPassword, 10)
     const contrasenaHash = await bcrypt.hash(contrasena, 10)
+    const experienceYears = parseExperienceYears(experiencia)
+    const disciplines = [profesionOficio]
 
     // El peritus_id se calcula DENTRO del bucle: si dos registros concurrentes
     // obtienen el mismo número, el índice único lanza 23505 y reintentamos con
@@ -88,41 +98,71 @@ export async function POST(request: NextRequest) {
       peritusId = nextPeritusId(await getMaxNumericPeritusId())
       try {
         await withTransaction(async (db) => {
-          // STEP 1: crm_client
-          await db.query(
-            `INSERT INTO crm_client (id, brand, name, email, phone, company, position, notes, status, created_by)
-             VALUES ($1, 'Peritus', $2, $3, $4, '', $5, $6, 'prospecto', 'Registro Web PERITUS')`,
-            [
-              clientId, nombreApellido, correo, celular, cargo,
-              `Profesión: ${profesionOficio} | Especialidad: ${especialidad} | Experiencia: ${experiencia}`,
-            ],
-          )
-
-          // STEP 2: crm_user (acceso portal) — crear o actualizar contraseña si ya existe
-          const found = await db.query(
+          // STEP 1: crm_user con rol 'perito'. Si el correo ya tiene cuenta activa
+          // la reutiliza y la promueve a perito (evita chocar con el índice único
+          // de username); si no, crea la cuenta nueva.
+          let userId = crmUserId
+          const foundUser = await db.query(
             `SELECT id FROM crm_user WHERE lower(email) = lower($1) AND active = TRUE LIMIT 1`,
             [correo],
           )
-          if (found.rows.length > 0) {
+          if (foundUser.rows.length > 0) {
+            userId = foundUser.rows[0].id
             await db.query(
-              `UPDATE crm_user SET password_hash = $1, must_change_password = TRUE WHERE id = $2`,
-              [portalPasswordHash, found.rows[0].id],
+              `UPDATE crm_user SET password_hash = $1, role = 'perito', must_change_password = TRUE WHERE id = $2`,
+              [portalPasswordHash, userId],
             )
           } else {
             await db.query(
               `INSERT INTO crm_user (id, username, email, display_name, phone, password_hash, role, active, must_change_password)
-               VALUES ($1, $2, $2, $3, $4, $5, 'cliente', TRUE, TRUE)`,
-              [newId(), correo, nombreApellido, celular, portalPasswordHash],
+               VALUES ($1, $2, $2, $3, $4, $5, 'perito', TRUE, TRUE)`,
+              [userId, correo, nombreApellido, celular, portalPasswordHash],
             )
           }
 
-          // STEP 3: registro_peritus
+          // STEP 2: expert (perfil en el directorio de Peritos del CRM, estado
+          // 'pendiente' de validación). Idempotente por user_id: actualiza si ya
+          // existía un perfil para esa cuenta.
+          const foundExpert = await db.query(`SELECT id FROM expert WHERE user_id = $1 LIMIT 1`, [userId])
+          if (foundExpert.rows.length > 0) {
+            await db.query(
+              `UPDATE expert SET
+                 disciplines = $1::text[], specialization = $2, experience_years = $3,
+                 city = $4, tax_id = $5, cv_file_url = $6, cv_file_asset_id = $7,
+                 cv_file_name = $8, cv_mime_type = $9, cv_file_size = $10
+               WHERE id = $11`,
+              [
+                disciplines, especialidad, experienceYears, ciudad, cedula,
+                cvFile?.url ?? null, cvFile?.assetId ?? null, cvFile?.name ?? null,
+                cvFile?.mime ?? null, cvFile?.size ?? null, foundExpert.rows[0].id,
+              ],
+            )
+          } else {
+            await db.query(
+              `INSERT INTO expert (
+                 id, user_id, disciplines, specialization, experience_years, professional_card,
+                 city, region, tax_id, cv_file_url, cv_file_asset_id, cv_file_name, cv_mime_type,
+                 cv_file_size, availability, validation_status, fee_currency
+               ) VALUES (
+                 $1, $2, $3::text[], $4, $5, '', $6, '', $7, $8, $9, $10, $11, $12,
+                 'disponible', 'pendiente', 'COP'
+               )`,
+              [
+                newId(), userId, disciplines, especialidad, experienceYears, ciudad, cedula,
+                cvFile?.url ?? null, cvFile?.assetId ?? null, cvFile?.name ?? null,
+                cvFile?.mime ?? null, cvFile?.size ?? null,
+              ],
+            )
+          }
+
+          // STEP 3: registro_peritus (login del portal + datos del formulario y CV).
+          // Vinculado al crm_user del perito (user_id). Ya NO se crea crm_client.
           await db.query(
             `INSERT INTO registro_peritus (
                id, peritus_id, nombre_apellido, cedula, correo, celular, ciudad,
                profesion_oficio, cargo, experiencia, especialidad, edad,
                file_url, file_asset_id, file_name, mime_type, file_size,
-               fecha_registro, estado_documentacion, activo, contrasena_hash, client_id
+               fecha_registro, estado_documentacion, activo, contrasena_hash, user_id
              ) VALUES (
                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,
                $13, $14, $15, $16, $17, now(), 'pendiente', TRUE, $18, $19
@@ -132,7 +172,7 @@ export async function POST(request: NextRequest) {
               profesionOficio, cargo, experiencia, especialidad, edad,
               cvFile?.url ?? null, cvFile?.assetId ?? null, cvFile?.name ?? null,
               cvFile?.mime ?? null, cvFile?.size ?? null,
-              contrasenaHash, clientId,
+              contrasenaHash, userId,
             ],
           )
         })
@@ -144,7 +184,7 @@ export async function POST(request: NextRequest) {
     }
 
     // STEP 4: email de bienvenida de Peritus (fire-and-forget).
-    // El perito entra con su correo y la contraseña que ELIGIÓ en este formulario.
+    // El perito entra al portal con su correo y la contraseña que ELIGIÓ en este formulario.
     sendPeritusWelcomeEmail({
       to: correo,
       nombre: nombreApellido,

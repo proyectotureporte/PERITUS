@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getQuoteById, updateQuote } from '@/lib/db/quote';
 import { logCaseEvent } from '@/lib/sanity/logEvent';
-import { verifyClientOwnsCase } from '@/lib/auth/clientAccess';
+import { verifyExpertOwnsCase } from '@/lib/auth/clientAccess';
 import type { Quote } from '@/lib/types';
 
 type QuoteWithCase = Quote & { case?: { _id: string; caseCode: string; title: string } };
@@ -29,11 +29,11 @@ export async function POST(
       return NextResponse.json({ success: false, error: 'Cotizacion no encontrada' }, { status: 404 });
     }
 
-    // Un cliente solo puede rechazar cotizaciones de SUS propios casos.
+    // El perito solo puede rechazar cotizaciones de los casos que tiene asignados.
     if (userRole === 'cliente') {
       const caseId = existing.case?._id;
       const { owns } = caseId
-        ? await verifyClientOwnsCase(userId || '', caseId)
+        ? await verifyExpertOwnsCase(userId || '', caseId)
         : { owns: false };
       if (!owns) {
         return NextResponse.json({ success: false, error: 'No tiene acceso a esta cotizacion' }, { status: 403 });

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { listClientVisibleDocuments, createCaseDocument } from '@/lib/db/caseDocument';
 import { getCaseById } from '@/lib/db/cases';
 import { uploadFile } from '@/lib/sanity/assets';
-import { verifyClientOwnsCase } from '@/lib/auth/clientAccess';
+import { verifyExpertOwnsCase } from '@/lib/auth/clientAccess';
 import { DOCUMENT_CATEGORY_LABELS, type DocumentCategory } from '@/lib/types';
 import { logCaseEvent } from '@/lib/sanity/logEvent';
 
@@ -16,7 +16,7 @@ export async function GET(
     const userId = request.headers.get('x-user-id') || '';
 
     if (userRole === 'cliente') {
-      const { owns } = await verifyClientOwnsCase(userId, id);
+      const { owns } = await verifyExpertOwnsCase(userId, id);
       if (!owns) {
         return NextResponse.json({ success: false, error: 'No tiene acceso a este caso' }, { status: 403 });
       }
@@ -41,7 +41,7 @@ export async function POST(
     const userRole = request.headers.get('x-user-role') || '';
 
     if (userRole === 'cliente') {
-      const { owns } = await verifyClientOwnsCase(userId || '', id);
+      const { owns } = await verifyExpertOwnsCase(userId || '', id);
       if (!owns) {
         return NextResponse.json({ success: false, error: 'No tiene acceso a este caso' }, { status: 403 });
       }
