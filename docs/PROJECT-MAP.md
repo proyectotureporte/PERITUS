@@ -44,7 +44,7 @@
 
 ## Flujos de usuario
 1. **Cotización pública**: landing → form → POST /api/cotizacion → fila en `cotizacion` → visible en /portal/cotizaciones.
-2. **Registro de perito**: /registro → POST multipart → crm_user (rol 'perito', password CNPxxxx) + expert (directorio de Peritos del CRM de CNP, `validation_status` 'pendiente', con CV y datos mapeados: disciplines=profesión, specialization=especialidad, experience_years, city, tax_id=cédula) + registro_peritus (`user_id`→crm_user, contraseña elegida) → email de credenciales (manda la CNPxxxx, ¡no la elegida!) → pantalla de éxito con código PER-XXXX. **Aparecen en CRM › Peritos, NO en Clientes.**
+2. **Registro de perito**: /registro → POST multipart → crm_user (rol 'perito', password CNPxxxx) + expert (directorio de Peritos del CRM de CNP, `validation_status` 'candidato', clasificado por nivel (junior/senior/master) y macro-categoría; specialization=especialidad, disciplinas derivadas de la categoría, formación pregrado/especializaciones/maestrías/doctorado, CV, tax_id=cédula) + registro_peritus (`user_id`→crm_user, contraseña elegida) → email de credenciales (manda la CNPxxxx, ¡no la elegida!) → pantalla de éxito con código PER-XXXX. **Aparecen en CRM › Peritos, NO en Clientes.**
 3. **Portal (perito)**: login con email + contraseña elegida en registro → /portal/cases (casos donde es `assigned_expert_id`) → detalle → ver quotes/eventos/documentos → subir documento → aprobar/rechazar quote (estado 'enviada'). Ownership por `assigned_expert_id` (`verifyExpertOwnsCase`).
 4. **Admin cotizaciones**: /portal/cotizaciones → contraseña compartida → lista.
 
