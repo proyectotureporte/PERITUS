@@ -31,6 +31,10 @@ const securityHeaders = [
 ];
 
 const nextConfig = {
+  images: {
+    // Imágenes subidas desde el panel /santiago (Sanity CDN)
+    remotePatterns: [{ protocol: 'https', hostname: 'cdn.sanity.io' }],
+  },
   poweredByHeader: false,
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];

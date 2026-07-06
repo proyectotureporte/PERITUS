@@ -13,6 +13,9 @@ import {
 } from 'lucide-react';
 import Header from '@/components/landing/Header';
 import Footer from '@/components/landing/Footer';
+import { mergeContenido } from '@/lib/content/tipos';
+import { DEFAULTS } from '@/lib/content/paginas/home';
+import { getSiteContent } from '@/lib/content/store';
 import {
   FadeUp,
   FadeLeft,
@@ -25,67 +28,10 @@ import {
   GrowLine,
 } from '@/components/landing/Animations';
 
-const peritosEspecializados = [
-  { nombre: 'Medicina', icon: HeartPulse },
-  { nombre: 'Ingenieria', icon: Scale },
-  { nombre: 'Finanzas', icon: TrendingUp },
-  { nombre: 'Informática', icon: Monitor },
-  { nombre: 'Grafología', icon: Home },
-  { nombre: 'Industria', icon: Factory },
-];
-
-const beneficios = [
-  'Precisión en pretensiones y liquidaciones, clave para fortalecer su caso.',
-  'Dictámenes con estándares técnicos y validez legal en cualquier jurisdicción.',
-  'Equipo multidisciplinario que cubre todas las áreas periciales.',
-  'Tiempos de respuesta optimizados para cumplir con plazos procesales.',
-  'Acompañamiento durante todo el proceso judicial',
-  'Confidencialidad y manejo seguro de la información de cada caso.',
-];
-
-const valores = [
-  {
-    icon: Target,
-    titulo: 'Precisión',
-    texto:
-      'Precisión en pretensiones y liquidaciones, clave para fortalecer su caso.',
-  },
-  {
-    icon: Clock,
-    titulo: 'Confianza',
-    texto:
-      'Tiempos de respuesta eficientes que se ajustan a los plazos procesales de cada caso.',
-  },
-  {
-    icon: SearchCheck,
-    titulo: 'Rigor',
-    texto:
-      'Análisis exhaustivo con sustento técnico que respalda cada conclusión del dictamen.',
-  },
-];
-
-const audienceCards = [
-  {
-    label: 'Soy perito',
-    image: '/dictamen-pericial.jpg',
-    href: '/perito',
-  },
-  {
-    label: 'Soy abogado',
-    image: '/lawyers-office.jpg',
-    href: '/abogado',
-  },
-  {
-    label: 'Soy juez',
-    image: '/gavel.jpg',
-    href: '/juez',
-  },
-  {
-    label: 'Soy empresa',
-    image: '/office-meeting.jpg',
-    href: '/empresa',
-  },
-];
+// El contenido editable (textos/imágenes) viene de site_content (panel /santiago);
+// los iconos permanecen en código.
+const iconosPeritos = [HeartPulse, Scale, TrendingUp, Monitor, Home, Factory];
+const iconosValores = [Target, Clock, SearchCheck];
 
 const clientes = [
   { nombre: 'EMCALI', logo: '/EMCALI.png' },
@@ -99,9 +45,41 @@ const clientes = [
   { nombre: 'LOGON3', logo: '/LOGON3.png', w: 288, h: 160 },
 ];
 
-export default function HomePage() {
+export const dynamic = 'force-dynamic';
+
+export default async function HomePage() {
+  let overrides: Record<string, unknown> | null = null;
+  try {
+    const row = await getSiteContent('home');
+    overrides = row?.valor ?? null;
+  } catch { /* sin overrides: defaults */ }
+  const c = mergeContenido(DEFAULTS, overrides);
+
+  const peritosEspecializados = [
+    c.peritos.area1, c.peritos.area2, c.peritos.area3,
+    c.peritos.area4, c.peritos.area5, c.peritos.area6,
+  ].map((nombre, i) => ({ nombre, icon: iconosPeritos[i] }));
+
+  const beneficios = [
+    c.beneficios.b1, c.beneficios.b2, c.beneficios.b3,
+    c.beneficios.b4, c.beneficios.b5, c.beneficios.b6,
+  ];
+
+  const valores = [
+    { icon: iconosValores[0], titulo: c.valores.v1Titulo, texto: c.valores.v1Texto },
+    { icon: iconosValores[1], titulo: c.valores.v2Titulo, texto: c.valores.v2Texto },
+    { icon: iconosValores[2], titulo: c.valores.v3Titulo, texto: c.valores.v3Texto },
+  ];
+
+  const audienceCards = [
+    { label: c.audiencia.t1Label, image: c.audiencia.t1Imagen, href: c.audiencia.t1Href },
+    { label: c.audiencia.t2Label, image: c.audiencia.t2Imagen, href: c.audiencia.t2Href },
+    { label: c.audiencia.t3Label, image: c.audiencia.t3Imagen, href: c.audiencia.t3Href },
+    { label: c.audiencia.t4Label, image: c.audiencia.t4Imagen, href: c.audiencia.t4Href },
+  ];
+
   return (
-    <div className="min-h-screen overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden" style={{ fontFamily: c.estilos.fuente }}>
       <Header />
 
       {/* ============================================ */}
@@ -114,7 +92,7 @@ export default function HomePage() {
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: `url('/fondo.png')`,
+            backgroundImage: `url('${c.hero.imagenFondo}')`,
             backgroundSize: 'auto 100%',
             backgroundPosition: 'right center',
             backgroundRepeat: 'no-repeat',
@@ -126,20 +104,17 @@ export default function HomePage() {
           <div className="max-w-2xl">
             <HeroFadeUp delay={0.2}>
               <p className="text-white/80 text-sm sm:text-base font-medium tracking-wide uppercase mb-4">
-                Peritos expertos para abogados, jueces y litigantes
+                {c.hero.kicker}
               </p>
             </HeroFadeUp>
             <HeroFadeUp delay={0.4}>
               <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-white uppercase leading-tight">
-                EL ALIADO IDEAL PARA SUS LITIGIOS
+                {c.hero.titulo}
               </h1>
             </HeroFadeUp>
             <HeroFadeUp delay={0.6}>
               <p className="mt-6 text-base sm:text-lg text-white/85 leading-relaxed max-w-xl">
-                Somos especialistas en conectar abogados y clientes con peritos
-                altamente calificados en distintas áreas, facilitando el acceso a
-                dictámenes periciales confiables, técnicos y con validez legal para
-                respaldar cada etapa del proceso judicial.
+                {c.hero.parrafo}
               </p>
             </HeroFadeUp>
             <HeroFadeUp delay={0.8}>
@@ -148,7 +123,7 @@ export default function HomePage() {
                   href="#audiencia"
                   className="inline-block px-8 py-3 bg-white text-navy-dark font-bold rounded-lg hover:bg-white/90 transition-colors text-sm sm:text-base"
                 >
-                  Asesor especialista
+                  {c.hero.botonTexto}
                 </a>
               </div>
             </HeroFadeUp>
@@ -166,7 +141,7 @@ export default function HomePage() {
               className="text-center mb-12"
               style={{ fontSize: 'clamp(28px, 4vw, 38px)', fontWeight: 800, color: '#ffffff' }}
             >
-              ¿Quién eres?
+              {c.audiencia.titulo}
             </h2>
           </FadeUp>
           <StaggerGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -199,7 +174,7 @@ export default function HomePage() {
                           letterSpacing: '0.5px',
                         }}
                       >
-                        Haga clic en Ver más para conocer nuestros servicios
+                        {c.audiencia.overlayTexto}
                       </span>
                     </div>
                   </a>
@@ -232,7 +207,7 @@ export default function HomePage() {
                         display: 'inline-block',
                         fontSize: '13px',
                         fontWeight: 800,
-                        backgroundColor: '#d4a843',
+                        backgroundColor: c.estilos.colorDorado,
                         color: '#0a2a6e',
                         borderRadius: '8px',
                         padding: '10px 28px',
@@ -241,7 +216,7 @@ export default function HomePage() {
                         textTransform: 'uppercase',
                       }}
                     >
-                      Ver m&aacute;s
+                      {c.audiencia.botonTexto}
                     </a>
                   </div>
                 </div>
@@ -258,12 +233,12 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white text-center mb-4">
-              Peritos especializados
+              {c.peritos.titulo}
             </h2>
           </FadeUp>
           <FadeUp delay={0.15}>
             <p className="text-white/70 text-center text-lg mb-16 max-w-2xl mx-auto">
-              Contamos con expertos certificados en las principales áreas del conocimiento pericial
+              {c.peritos.subtitulo}
             </p>
           </FadeUp>
           <StaggerGrid className="grid grid-cols-2 md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
@@ -292,10 +267,10 @@ export default function HomePage() {
             <FadeLeft>
               <div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-navy-dark mb-6">
-                  ¿Quiénes somos?
+                  {c.quienesSomos.titulo}
                 </h2>
                 <p className="text-gray-700 leading-relaxed mb-8 text-justify">
-                  <strong>Peritus</strong> es una plataforma que conecta profesionales del derecho y clientes con peritos especializados en diversas áreas técnicas y científicas, facilitando el acceso a dictámenes periciales claros, rigurosos y con plena validez legal, y brindando soporte técnico que fortalece los procesos judiciales a través de una red de expertos que aporta análisis confiables y contribuye a la solidez de cada caso.
+                  {c.quienesSomos.parrafo}
                 </p>
               </div>
             </FadeLeft>
@@ -304,7 +279,7 @@ export default function HomePage() {
               <div className="flex flex-col items-center">
                 <div className="w-full max-w-md rounded-xl overflow-hidden shadow-lg">
                   <Image
-                    src="/fondo.png"
+                    src={c.quienesSomos.imagen}
                     alt="Equipo Peritus"
                     width={500}
                     height={400}
@@ -324,12 +299,12 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white text-center mb-4">
-              Beneficios de nuestro servicio
+              {c.beneficios.titulo}
             </h2>
           </FadeUp>
           <FadeUp delay={0.15}>
             <p className="text-white/60 text-center text-lg mb-16 max-w-2xl mx-auto">
-              Soluciones periciales integrales que marcan la diferencia en cada proceso
+              {c.beneficios.subtitulo}
             </p>
           </FadeUp>
           <StaggerGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
@@ -358,13 +333,13 @@ export default function HomePage() {
                 style={{
                   fontSize: '18px',
                   fontWeight: 700,
-                  color: '#d4a843',
+                  color: c.estilos.colorDorado,
                   letterSpacing: '3px',
                   textTransform: 'uppercase',
                   marginBottom: '12px',
                 }}
               >
-                Lo que nos define
+                {c.valores.eyebrow}
               </p>
               <h2
                 style={{
@@ -373,7 +348,7 @@ export default function HomePage() {
                   color: '#0a2a6e',
                 }}
               >
-                Nuestros valores
+                {c.valores.titulo}
               </h2>
               <div
                 style={{
@@ -441,7 +416,7 @@ export default function HomePage() {
         <FadeUp>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
             <h2 className="text-2xl sm:text-3xl font-bold text-white text-center">
-              Confían en nosotros
+              {c.clientes.titulo}
             </h2>
           </div>
         </FadeUp>
@@ -490,7 +465,7 @@ export default function HomePage() {
 
           <FadeUp>
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-8 text-center">
-              Operación nacional
+              {c.operacion.titulo}
             </h2>
           </FadeUp>
 
@@ -511,9 +486,7 @@ export default function HomePage() {
             </ScaleUp>
             <FadeUp delay={0.4}>
               <p className="text-white/85 leading-relaxed max-w-2xl text-base sm:text-lg">
-                En Peritus trabajamos en todo el territorio Colombiano, ofreciendo un
-                servicio de calidad sin restricción por la ubicación de nuestros
-                clientes.
+                {c.operacion.parrafo}
               </p>
             </FadeUp>
           </div>

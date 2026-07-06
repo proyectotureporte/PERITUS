@@ -14,6 +14,9 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/api/cotizacion') ||
     pathname.startsWith('/api/portal/cotizaciones/') ||
     pathname.startsWith('/api/registro-peritus') ||
+    // Server-to-server desde el panel /santiago (se auto-protege con
+    // x-content-secret === CONTENT_ADMIN_SECRET dentro del handler)
+    pathname.startsWith('/api/site-content/') ||
     pathname === '/registro'
   ) {
     return NextResponse.next();
