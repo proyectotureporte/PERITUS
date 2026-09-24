@@ -36,6 +36,10 @@ const nextConfig = {
     remotePatterns: [{ protocol: 'https', hostname: 'cdn.sanity.io' }],
   },
   poweredByHeader: false,
+  experimental: {
+    // proxy.ts recorta cuerpos >10 MB por defecto; la hoja de vida admite 50 MB.
+    proxyClientMaxBodySize: '55mb',
+  },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },

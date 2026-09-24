@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     const hojaDeVida = formData.get('hojaDeVida') as File | null
 
     // Validations
-    if (!nombreApellido || !cedula || !correo || !celular || !ciudad ||
+    if (!nombreApellido || !cedula || !correo || !celular || !ciudad || !departamento ||
         !macroCategoria || !especialidad || !cargo || !experiencia || !edad || !contrasena) {
       return NextResponse.json({ error: 'Todos los campos son obligatorios' }, { status: 400 })
     }
@@ -84,8 +84,8 @@ export async function POST(request: NextRequest) {
 
     // Upload CV to Sanity CDN
     let cvFile: { url: string | null; assetId: string; name: string | null; mime: string | null; size: number | null } | null = null
-    if (hojaDeVida.size > 5 * 1024 * 1024) {
-      return NextResponse.json({ error: 'La hoja de vida no puede superar 5MB' }, { status: 400 })
+    if (hojaDeVida.size > 50 * 1024 * 1024) {
+      return NextResponse.json({ error: 'La hoja de vida no puede superar 50 MB' }, { status: 400 })
     }
     {
       const buffer = Buffer.from(await hojaDeVida.arrayBuffer())
