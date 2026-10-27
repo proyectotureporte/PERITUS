@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import Image from 'next/image'
+import { trackLead } from '@/lib/track'
 import { EXPERIENCE_RANGES } from '@/lib/peritos/clasificacion'
 import { EXPERT_CATEGORIES, EXPERT_CATEGORY_LABELS, EXPERT_CATEGORY_SPECIALTIES, type ExpertCategory } from '@/lib/peritos/categorias'
 
@@ -281,6 +282,7 @@ export default function RegistroPeritus() {
       setGeneratedCode(result.peritusId)
       setRegisteredName(form.nombreApellido)
       setSuccess(true)
+      trackLead('registro_perito')
 
       setForm(EMPTY_FORM)
       setFormacion(EMPTY_FORMACION)

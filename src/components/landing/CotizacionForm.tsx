@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import { trackLead } from '@/lib/track';
 import { Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 const tiposPeritaje = [
@@ -61,6 +62,7 @@ export default function CotizacionForm() {
 
       if (res.ok) {
         setStatus('success');
+        trackLead('cotizacion');
         setFormData(initialFormData);
       } else {
         setStatus('error');

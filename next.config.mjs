@@ -16,11 +16,11 @@ const securityHeaders = [
     // estilos inline de Tailwind. img/connect abiertos al CDN de Sanity y a maps.
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://restaurar.co",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://cdn.sanity.io https://*.googleapis.com https://*.gstatic.com https://maps.google.com",
       "font-src 'self' data:",
-      "connect-src 'self' https://cdn.sanity.io",
+      "connect-src 'self' https://cdn.sanity.io https://api.restaurar.co",
       "frame-src 'self' https://maps.google.com https://www.google.com",
       "object-src 'none'",
       "base-uri 'self'",

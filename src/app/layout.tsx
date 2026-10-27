@@ -35,6 +35,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
+      <head>
+        <script defer src="https://restaurar.co/m.js" data-site="peritus" data-exclude="/portal,/santiago,/api"></script>
+      </head>
       <body className={inter.className}>
         {children}
         <WhatsAppButton />
