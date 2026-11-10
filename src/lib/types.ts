@@ -346,20 +346,28 @@ export interface Quote {
 // DOCUMENTOS DE CASO
 // ============================================
 
+// Mismas 12 categorías del expediente de CNP (migración 014/015 de CNP).
 export const DOCUMENT_CATEGORIES = [
-  'demanda', 'soporte_tecnico', 'contrato', 'cotizacion',
-  'plan_trabajo', 'entrega_parcial', 'dictamen_final',
-  'audiencia', 'pago', 'otro',
+  'solicitud_dictamen', 'ficha_tecnica', 'nda', 'solicitud_documentos',
+  'propuesta_comercial', 'documentos_caso', 'contrato', 'plan_trabajo',
+  'informe_preliminar', 'dictamen', 'audiencia', 'comprobantes_pago',
 ] as const;
 
 export type DocumentCategory = (typeof DOCUMENT_CATEGORIES)[number];
 
 export const DOCUMENT_CATEGORY_LABELS: Record<DocumentCategory, string> = {
-  demanda: 'Demanda', soporte_tecnico: 'Soporte Tecnico',
-  contrato: 'Contrato', cotizacion: 'Cotizacion',
-  plan_trabajo: 'Plan de Trabajo', entrega_parcial: 'Entrega Parcial',
-  dictamen_final: 'Dictamen Final', audiencia: 'Audiencia',
-  pago: 'Pago', otro: 'Otro',
+  solicitud_dictamen: 'Solicitud del dictamen',
+  ficha_tecnica: 'Ficha técnica',
+  nda: 'NDA — Acuerdo de confidencialidad firmado',
+  solicitud_documentos: 'Solicitud de documentos',
+  propuesta_comercial: 'Propuesta comercial',
+  documentos_caso: 'Documentos del caso',
+  contrato: 'Contrato',
+  plan_trabajo: 'Plan de trabajo',
+  informe_preliminar: 'Informe preliminar',
+  dictamen: 'Dictamen',
+  audiencia: 'Audiencia',
+  comprobantes_pago: 'Comprobantes de pago',
 };
 
 export interface CaseDocument {

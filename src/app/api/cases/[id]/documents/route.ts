@@ -55,7 +55,9 @@ export async function POST(
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
     const description = (formData.get('description') as string) || '';
-    const category: DocumentCategory = 'soporte_tecnico';
+    // Archivos de trabajo del perito: quedan como documentos del caso, ocultos
+    // al cliente final y pendientes de revisión por el equipo de CNP.
+    const category: DocumentCategory = 'documentos_caso';
 
     if (!file) {
       return NextResponse.json({ success: false, error: 'Archivo requerido' }, { status: 400 });
@@ -79,15 +81,16 @@ export async function POST(
       mimeType: file.type,
       fileSize: file.size,
       version: 1,
-      isVisibleToClient: true,
+      isVisibleToClient: false,
       description,
+      reviewStatus: 'pendiente_revision',
     });
 
     const catLabel = DOCUMENT_CATEGORY_LABELS[category] || category;
     logCaseEvent({
       caseId: id,
       eventType: 'document_uploaded',
-      description: `Documento subido: "${file.name}" (${catLabel})`,
+      description: `Documento subido por el perito: "${file.name}" (${catLabel})`,
       userId,
       userName,
     });

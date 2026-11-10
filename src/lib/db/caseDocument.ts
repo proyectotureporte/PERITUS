@@ -57,6 +57,8 @@ export interface CaseDocumentInput {
   version?: number;
   isVisibleToClient?: boolean;
   description?: string | null;
+  /** Revisión por el equipo de CNP (migración 018 de CNP): los archivos del perito entran pendientes. */
+  reviewStatus?: 'pendiente_revision' | 'aprobado' | 'requiere_correccion' | null;
 }
 
 export async function createCaseDocument(input: CaseDocumentInput): Promise<CaseDocument | null> {
@@ -75,6 +77,7 @@ export async function createCaseDocument(input: CaseDocumentInput): Promise<Case
     version: input.version ?? 1,
     is_visible_to_client: input.isVisibleToClient ?? false,
     description: input.description ?? null,
+    ...(input.reviewStatus ? { review_status: input.reviewStatus } : {}),
   });
   await query(text, values);
   return getCaseDocumentById(id);
